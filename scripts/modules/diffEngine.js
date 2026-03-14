@@ -11,11 +11,11 @@ const DiffEngine = {
    * @returns {Array} 差異數組
    */
   diffLines(original, modified) {
-    if (typeof JsDiff === 'undefined') {
+    if (typeof Diff === 'undefined') {
       console.error('jsdiff library not loaded');
       return [];
     }
-    return JsDiff.diffLines(original, modified);
+    return Diff.diffLines(original, modified);
   },
 
   /**
@@ -25,11 +25,11 @@ const DiffEngine = {
    * @returns {Array} 差異數組
    */
   diffWords(original, modified) {
-    if (typeof JsDiff === 'undefined') {
+    if (typeof Diff === 'undefined') {
       console.error('jsdiff library not loaded');
       return [];
     }
-    return JsDiff.diffWords(original, modified);
+    return Diff.diffWords(original, modified);
   },
 
   /**
@@ -39,7 +39,7 @@ const DiffEngine = {
    * @returns {Array} 差異數組
    */
   diffParagraphs(original, modified) {
-    if (typeof JsDiff === 'undefined') {
+    if (typeof Diff === 'undefined') {
       console.error('jsdiff library not loaded');
       return [];
     }
@@ -48,7 +48,7 @@ const DiffEngine = {
     const originalParas = original.split(/\n\s*\n/);
     const modifiedParas = modified.split(/\n\s*\n/);
     
-    return JsDiff.diffArrays(originalParas, modifiedParas);
+    return Diff.diffArrays(originalParas, modifiedParas);
   },
 
   /**
