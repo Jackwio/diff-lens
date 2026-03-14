@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="一個輕量級的文本差異比較應用，類似 Git 的 diff 功能。" />
+    <meta name="theme-color" content="#2563eb" />
+
+    <title>Diff-Lens 📋 | 文本差異比較工具</title>
+
+    <link rel="stylesheet" href="styles/main.css" />
+
+    <!-- 預加載 jsdiff 庫 -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js" as="script" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <h1>📋 Diff-Lens</h1>
+        <p>輕量級文本差異比較工具 — 類似 Git 的 diff 功能</p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+      <!-- Input Section -->
+      <section class="main-content">
+        <!-- Original Content -->
+        <div class="input-section">
+          <div class="input-box">
+            <div class="input-header left">🔴 原始內容</div>
+            <div class="input-body">
+              <div class="input-controls">
+                <button class="btn" title="Upload original file">
+                  <span>📁 上傳</span>
+                  <input type="file" id="uploadOriginal" accept=".txt,.md,.js,.py,.html,.css" />
+                </button>
+                <button class="btn" title="Clear original content" id="clearOriginalBtn">
+                  <span>🗑️ 清空</span>
+                </button>
+              </div>
+              <textarea
+                id="originalInput"
+                class="textarea"
+                placeholder="粘貼或輸入原始文本内容...
+                
+或點擊上方 '上傳' 按鈕載入文件"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modified Content -->
+        <div class="input-section">
+          <div class="input-box">
+            <div class="input-header right">🟢 修改後內容</div>
+            <div class="input-body">
+              <div class="input-controls">
+                <button class="btn" title="Upload modified file">
+                  <span>📁 上傳</span>
+                  <input type="file" id="uploadModified" accept=".txt,.md,.js,.py,.html,.css" />
+                </button>
+                <button class="btn" title="Clear modified content" id="clearModifiedBtn">
+                  <span>🗑️ 清空</span>
+                </button>
+              </div>
+              <textarea
+                id="modifiedInput"
+                class="textarea"
+                placeholder="粘貼或輸入修改後的文本内容...
+                
+或點擊上方 '上傳' 按鈕載入文件"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Controls Section -->
+      <section class="controls-section">
+        <!-- Granularity Selection -->
+        <div class="controls-group">
+          <label class="controls-label">比對粒度</label>
+          <div class="button-group">
+            <button class="btn-toggle active" data-granularity="line" title="Compare line by line">
+              📏 行級
+            </button>
+            <button class="btn-toggle" data-granularity="word" title="Compare word by word">
+              📝 單詞級
+            </button>
+            <button class="btn-toggle" data-granularity="paragraph" title="Compare paragraph by paragraph">
+              📄 段落級
+            </button>
+          </div>
+        </div>
+
+        <!-- View Mode Selection -->
+        <div class="controls-group">
+          <label class="controls-label">顯示模式</label>
+          <div class="button-group">
+            <button class="btn-toggle active" data-view-mode="combined" title="Show combined diff view">
+              📊 整體模式
+            </button>
+            <button class="btn-toggle" data-view-mode="sideBySide" title="Show side-by-side comparison">
+              👥 逐行比較
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="controls-group">
+          <div class="button-group">
+            <button class="btn btn-primary" id="compareBtn" title="Compare the two texts">
+              🔍 開始比對
+            </button>
+            <button class="btn" id="copyBtn" title="Copy results to clipboard">
+              📋 複製結果
+            </button>
+            <button class="btn" id="clearBtn" title="Clear all inputs and results">
+              🗑️ 全部清空
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="results-section">
+        <div class="results-header">
+          <h2 class="results-title">比對結果</h2>
+          <div class="results-stats" id="statsContainer" style="display: none">
+            <div class="stat">
+              <div class="stat-icon added"></div>
+              <span id="addedCount">0</span>
+              新增
+            </div>
+            <div class="stat">
+              <div class="stat-icon removed"></div>
+              <span id="removedCount">0</span>
+              刪除
+            </div>
+            <div class="stat">
+              <div class="stat-icon modified"></div>
+              <span id="changePercentage">0%</span>
+              變化
+            </div>
+          </div>
+        </div>
+        <div id="resultsContainer"></div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem 1rem; color: #9ca3af; font-size: 12px; margin-top: 3rem; border-top: 1px solid #e5e7eb;">
+      <p>Made with ❤️ by Diff-Lens | <a href="https://github.com/yourusername/diff-lens" style="color: #2563eb; text-decoration: none;">GitHub</a> | <a href="LICENSE" style="color: #2563eb; text-decoration: none;">MIT License</a></p>
+    </footer>
+
+    <!-- Load jsdiff from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+
+    <!-- Load Modules -->
+    <script src="scripts/modules/store.js"></script>
+    <script src="scripts/modules/diffEngine.js"></script>
+    <script src="scripts/modules/parser.js"></script>
+    <script src="scripts/modules/ui.js"></script>
+
+    <!-- Main App -->
+    <script src="scripts/app.js"></script>
+  </body>
+</html>
