@@ -1,0 +1,6 @@
+# GitHub Pages Configuration for Diff-Lens
+# 該文件幫助 GitHub Pages 正確處理 SPA 路由
+
+# 強制使用 HTTPS
+AddType text/plain .
+Header set Cache-Control "max-age=3600"
