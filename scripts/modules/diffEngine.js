@@ -48,7 +48,14 @@ const DiffEngine = {
     const originalParas = original.split(/\n\s*\n/);
     const modifiedParas = modified.split(/\n\s*\n/);
     
-    return Diff.diffArrays(originalParas, modifiedParas);
+    // 執行陣列級差異
+    const diffs = Diff.diffArrays(originalParas, modifiedParas);
+    
+    // 將每個段落轉換回字符串格式（加上段落分隔符）
+    return diffs.map((diff) => ({
+      ...diff,
+      value: (Array.isArray(diff.value) ? diff.value.join('\n\n') : diff.value) + (diff.value && diff.value.length > 0 ? '\n\n' : '')
+    }));
   },
 
   /**

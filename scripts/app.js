@@ -103,12 +103,11 @@ const App = {
    * @param {string} granularity - 粒度
    */
   renderCombined(diffs, granularity) {
-    const html = Parser.toHtml(diffs, granularity);
-
     let output = '<div class="diff-content">';
 
     diffs.forEach((diff, index) => {
       const action = diff.added ? 'add' : diff.removed ? 'remove' : 'equal';
+      // 確保 diff.value 被轉換為字符串
       const content = Parser.escapeHtml(diff.value);
 
       if (action === 'equal') {

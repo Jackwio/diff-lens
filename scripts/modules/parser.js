@@ -149,6 +149,16 @@ const Parser = {
    * @returns {string} 轉義後的 HTML
    */
   escapeHtml(text) {
+    // 確保 text 是字符串，處理 null/undefined/array/object 等情況
+    if (text === null || text === undefined) {
+      return '';
+    }
+    
+    // 如果是數組或對象，轉換為字符串
+    if (typeof text !== 'string') {
+      text = String(text);
+    }
+    
     const map = {
       '&': '&amp;',
       '<': '&lt;',
