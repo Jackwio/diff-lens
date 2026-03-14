@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diff-Lens 功能演示</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1rem;
+      }
+      .test-case {
+        margin-bottom: 2rem;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+      .test-case h3 {
+        margin-top: 0;
+      }
+      .result {
+        background: #f5f5f5;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-family: monospace;
+        margin-top: 0.5rem;
+      }
+      .pass {
+        color: green;
+        font-weight: bold;
+      }
+      .fail {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Diff-Lens 功能演示</h1>
+
+    <div class="test-case">
+      <h3>✅ 模組加載測試</h3>
+      <p>驗證所有模組是否正確加載</p>
+      <div class="result" id="moduleTest"></div>
+    </div>
+
+    <div class="test-case">
+      <h3>✅ DiffEngine 功能測試</h3>
+      <p>測試行級、單詞級、段落級的差異計算</p>
+      <div class="result" id="diffEngineTest"></div>
+    </div>
+
+    <div class="test-case">
+      <h3>✅ Parser 功能測試</h3>
+      <p>測試差異解析和 HTML 轉換</p>
+      <div class="result" id="parserTest"></div>
+    </div>
+
+    <div class="test-case">
+      <h3>✅ Store 狀態管理測試</h3>
+      <p>測試狀態管理和訂閱功能</p>
+      <div class="result" id="storeTest"></div>
+    </div>
+
+    <div class="test-case">
+      <h3>✅ 集成測試</h3>
+      <p>測試完整的 diff 流程</p>
+      <div class="result" id="integrationTest"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+    <script src="scripts/modules/store.js"></script>
+    <script src="scripts/modules/diffEngine.js"></script>
+    <script src="scripts/modules/parser.js"></script>
+    <script src="scripts/modules/ui.js"></script>
+
+    <script>
+      // 模組加載測試
+      function testModules() {
+        const results = [];
+        results.push(typeof Store !== 'undefined' ? '✅ Store 模組已加載' : '❌ Store 模組未加載');
+        results.push(typeof DiffEngine !== 'undefined' ? '✅ DiffEngine 模組已加載' : '❌ DiffEngine 模組未加載');
+        results.push(typeof Parser !== 'undefined' ? '✅ Parser 模組已加載' : '❌ Parser 模組未加載');
+        results.push(typeof UI !== 'undefined' ? '✅ UI 模組已加載' : '❌ UI 模組未加載');
+        document.getElementById('moduleTest').innerHTML = results.join('<br>');
+      }
+
+      // DiffEngine 功能測試
+      function testDiffEngine() {
+        const results = [];
+        
+        try {
+          const orig = 'Hello World';
+          const mod = 'Hello Diff';
+          
+          // 行級
+          const lineDiff = DiffEngine.diffLines(orig, mod);
+          results.push(`✅ 行級差異: ${lineDiff.length > 0 ? '成功' : '失敗'}`);
+          
+          // 單詞級
+          const wordDiff = DiffEngine.diffWords(orig, mod);
+          results.push(`✅ 單詞級差異: ${wordDiff.length > 0 ? '成功' : '失敗'}`);
+          
+          // 統一接口
+          const diff1 = DiffEngine.diff(orig, mod, 'line');
+          const diff2 = DiffEngine.diff(orig, mod, 'word');
+          results.push(`✅ 統一 diff() 接口: ${diff1.length > 0 && diff2.length > 0 ? '成功' : '失敗'}`);
+        } catch (e) {
+          results.push(`❌ 錯誤: ${e.message}`);
+        }
+        
+        document.getElementById('diffEngineTest').innerHTML = results.join('<br>');
+      }
+
+      // Parser 功能測試
+      function testParser() {
+        const results = [];
+        
+        try {
+          const diffs = [
+            { value: 'Hello ', added: false, removed: false },
+            { value: 'World', added: false, removed: false },
+            { value: '!', added: true, removed: false }
+          ];
+          
+          // HTML 轉換
+          const html = Parser.toHtml(diffs, 'line');
+          results.push(`✅ toHtml: ${html.combined ? '成功' : '失敗'}`);
+          
+          // 分析
+          const stats = Parser.analyze(diffs);
+          results.push(`✅ analyze: added=${stats.added}, removed=${stats.removed}`);
+          
+          // HTML 轉義
+          const escaped = Parser.escapeHtml('<script>alert("xss")</script>');
+          results.push(`✅ escapeHtml: ${escaped.includes('&lt;') ? '成功' : '失敗'}`);
+        } catch (e) {
+          results.push(`❌ 錯誤: ${e.message}`);
+        }
+        
+        document.getElementById('parserTest').innerHTML = results.join('<br>');
+      }
+
+      // Store 狀態管理測試
+      function testStore() {
+        const results = [];
+        
+        try {
+          Store.reset();
+          
+          // 設置狀態
+          Store.setOriginal('Original');
+          results.push(`✅ setOriginal: ${Store.getState().original === 'Original' ? '成功' : '失敗'}`);
+          
+          Store.setModified('Modified');
+          results.push(`✅ setModified: ${Store.getState().modified === 'Modified' ? '成功' : '失敗'}`);
+          
+          // 訂閱測試
+          let callCount = 0;
+          const unsubscribe = Store.subscribe(() => callCount++);
+          Store.setGranularity('word');
+          results.push(`✅ subscribe: ${callCount > 0 ? '成功' : '失敗'}`);
+          
+          unsubscribe();
+          const prevCount = callCount;
+          Store.setGranularity('line');
+          results.push(`✅ unsubscribe: ${callCount === prevCount ? '成功' : '失敗'}`);
+        } catch (e) {
+          results.push(`❌ 錯誤: ${e.message}`);
+        }
+        
+        document.getElementById('storeTest').innerHTML = results.join('<br>');
+      }
+
+      // 集成測試
+      function testIntegration() {
+        const results = [];
+        
+        try {
+          Store.reset();
+          
+          const original = 'The quick brown fox\njumps over the lazy dog';
+          const modified = 'The quick fox\njumps over a lazy dog';
+          
+          Store.setOriginal(original);
+          Store.setModified(modified);
+          
+          // 執行行級差異
+          const lineDiffs = DiffEngine.diff(original, modified, 'line');
+          Store.setCurrentDiff(lineDiffs);
+          
+          results.push(`✅ 完整流程: ${lineDiffs.length > 0 ? '成功' : '失敗'}`);
+          
+          // 解析結果
+          const htmlResult = Parser.toHtml(lineDiffs, 'line');
+          results.push(`✅ HTML 呈現: ${htmlResult.combined ? '成功' : '失敗'}`);
+          
+          // 統計
+          const stats = Parser.analyze(lineDiffs);
+          results.push(`✅ 統計信息: 變化=${stats.totalChanges}, 新增=${stats.added}, 刪除=${stats.removed}`);
+        } catch (e) {
+          results.push(`❌ 錯誤: ${e.message}`);
+        }
+        
+        document.getElementById('integrationTest').innerHTML = results.join('<br>');
+      }
+
+      // 運行所有測試
+      window.addEventListener('load', () => {
+        testModules();
+        testDiffEngine();
+        testParser();
+        testStore();
+        testIntegration();
+      });
+    </script>
+  </body>
+</html>
